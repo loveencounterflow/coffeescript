@@ -93,6 +93,15 @@ construct?
   * ✅ rule out `a~ b()`
   * ✅ require `a ~b()`
 
+**Alternative**:
+
+* all applications of `~` *must* have a single argument to the left and *may* have a single argument to the
+  right
+* tilde operator expression can appear within comma operator lists, function calls without it 'crossing the
+  lines' as set by commas, so `f a, b ~mul c, d` -> CS `f a, ( mul b, c ), d`; this would make tilde call
+  expressions more like operators
+  * in fact maybe call them 'tilde *operators*'
+* despense with parens as in `a ~neg` -> CS `neg a` -> JS `neg( a )`?
 
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
