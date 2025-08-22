@@ -89,6 +89,7 @@ exports.compile = compile = withPrettyErrors (code, options = {}, handler = null
         break
 
   nodes = parser.parse tokens
+  handler { nodes, } if handler?
   # If all that was requested was a POJO representation of the nodes, e.g.
   # the abstract syntax tree (AST), we can stop now and just return that
   # (after fixing the location data for the root/`File`»`Program` node,
