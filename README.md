@@ -6,6 +6,7 @@
 - [RFCs](#rfcs)
   - [Macchiato: Coffe Plus Macros](#macchiato-coffe-plus-macros)
   - [(Extended?) LightScript Tilde Calls](#extended-lightscript-tilde-calls)
+  - [Tagged Comments for Conditional Execution](#tagged-comments-for-conditional-execution)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 
@@ -102,6 +103,12 @@ construct?
   expressions more like operators
   * in fact maybe call them 'tilde *operators*'
 * despense with parens as in `a ~neg` -> CS `neg a` -> JS `neg( a )`?
+
+### Tagged Comments for Conditional Execution
+
+* line comments of the form `/#:tag\s+(?<tagged_code>.*)$/`
+* block comments of the form `/###:tag\s+(?<tagged_code>.*)###$/s`
+* will be included in the code when a command-line flag or an in-file setting marks the tag for execution
 
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
