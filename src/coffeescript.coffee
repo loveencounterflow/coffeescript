@@ -60,6 +60,7 @@ withPrettyErrors = (fn) ->
 # object, where sourceMap is a sourcemap.coffee#SourceMap object, handy for
 # doing programmatic lookups.
 exports.compile = compile = withPrettyErrors (code, options = {}) ->
+  # console.log 'ΩCS___1', "compile()", handler # !!!!!!!!!!!!!!!!!!
   # Clone `options`, to avoid mutating the `options` object passed in.
   options = Object.assign {}, options
 

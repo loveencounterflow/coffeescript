@@ -26,6 +26,7 @@ CoffeeScript.compile = (code, options) ->
   # is available in the Node API. We need to do this so that tools like Webpack
   # can `require('coffeescript')` and build correctly, without trying to
   # require Babel.
+  # console.log 'Ωcs___1', 'CoffeeScript.compile()', handler
   if options?.transpile
     options.transpile.transpile = CoffeeScript.transpile
   universalCompile.call CoffeeScript, code, options
@@ -33,6 +34,7 @@ CoffeeScript.compile = (code, options) ->
 # Compile and execute a string of CoffeeScript (on the server), correctly
 # setting `__filename`, `__dirname`, and relative `require()`.
 CoffeeScript.run = (code, options = {}) ->
+  # console.log 'Ωcs___2', 'CoffeeScript.run()'
   mainModule = require.main
 
   # Set the filename.
@@ -114,6 +116,7 @@ if require.extensions
 
 CoffeeScript._compileRawFileContent = (raw, filename, options = {}) ->
 
+  # console.log 'Ωcs___3', 'CoffeeScript._compileRawFileContent()'
   # Strip the Unicode byte order mark, if this file begins with one.
   stripped = if raw.charCodeAt(0) is 0xFEFF then raw.substring 1 else raw
 
@@ -133,6 +136,7 @@ CoffeeScript._compileRawFileContent = (raw, filename, options = {}) ->
   answer
 
 CoffeeScript._compileFile = (filename, options = {}) ->
+  # console.log 'Ωcs___4', 'CoffeeScript._compileFile()'
   raw = fs.readFileSync filename, 'utf8'
 
   CoffeeScript._compileRawFileContent raw, filename, options
