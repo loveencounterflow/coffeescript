@@ -21,7 +21,7 @@ CoffeeScript.transpile = (js, options) ->
 # The `compile` method shared by the CLI, Node and browser APIs.
 universalCompile = CoffeeScript.compile
 # The `compile` method particular to the Node API.
-CoffeeScript.compile = (code, options) ->
+CoffeeScript.compile = ( code, options, handler = null ) ->
   # Pass a reference to Babel into the compiler, so that the transpile option
   # is available in the Node API. We need to do this so that tools like Webpack
   # can `require('coffeescript')` and build correctly, without trying to
@@ -29,7 +29,7 @@ CoffeeScript.compile = (code, options) ->
   # console.log 'Ωcs___1', 'CoffeeScript.compile()', handler
   if options?.transpile
     options.transpile.transpile = CoffeeScript.transpile
-  universalCompile.call CoffeeScript, code, options
+  universalCompile.call CoffeeScript, code, options, handler
 
 # Compile and execute a string of CoffeeScript (on the server), correctly
 # setting `__filename`, `__dirname`, and relative `require()`.

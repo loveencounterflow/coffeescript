@@ -42,9 +42,9 @@ base64encode = (src) -> switch
 # Function wrapper to add source file information to SyntaxErrors thrown by the
 # lexer/parser/compiler.
 withPrettyErrors = (fn) ->
-  (code, options = {}) ->
+  (code, options = {}, handler = null ) ->
     try
-      fn.call @, code, options
+      fn.call @, code, options, handler
     catch err
       throw err if typeof code isnt 'string' # Support `CoffeeScript.nodes(tokens)`.
       throw helpers.updateSyntaxError err, code, options.filename
@@ -59,7 +59,8 @@ withPrettyErrors = (fn) ->
 # in which case this returns a `{js, v3SourceMap, sourceMap}`
 # object, where sourceMap is a sourcemap.coffee#SourceMap object, handy for
 # doing programmatic lookups.
-exports.compile = compile = withPrettyErrors (code, options = {}) ->
+exports.compile = compile = withPrettyErrors (code, options = {}, handler = null) -> # !!!!!!!!!!
+# exports.compile = compile = withPrettyErrors (code, options = {}) ->
   # console.log 'ΩCS___1', "compile()", handler # !!!!!!!!!!!!!!!!!!
   # Clone `options`, to avoid mutating the `options` object passed in.
   options = Object.assign {}, options
@@ -72,6 +73,7 @@ exports.compile = compile = withPrettyErrors (code, options = {}) ->
   map = new SourceMap if generateSourceMap
 
   tokens = lexer.tokenize code, options
+  handler { tokens, } if handler?
 
   # Pass a list of referenced variables, so that generated variables won’t get
   # the same name.
