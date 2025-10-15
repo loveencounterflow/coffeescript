@@ -4,6 +4,8 @@
 
 - [Changes](#changes)
 - [RFCs](#rfcs)
+  - [Three Simple Things](#three-simple-things)
+  - [Better Un-Implicit Returns](#better-un-implicit-returns)
   - [Macchiato: Coffe Plus Macros](#macchiato-coffe-plus-macros)
   - [(Extended?) LightScript Tilde Calls](#extended-lightscript-tilde-calls)
   - [Tagged Comments for Conditional Execution](#tagged-comments-for-conditional-execution)
@@ -20,6 +22,99 @@
 
 
 ## RFCs
+
+### Three Simple Things
+
+https://www.reddit.com/r/ProgrammingLanguages/comments/1n41akt/comment/nbz5ovq/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button:
+
+> At the peril of adding even more bloat to this already long thread, I'd like to offer my Modest Proposal
+> For a Not-Too Shabby Language:
+>
+> * You don't get macros, hygienic or otherwise.
+>
+> * But you do get three things (on top of a language like Python or JavaScript so we're on common ground):
+>
+> * **deferred evaluation** of function arguments, probably only where marked as such; writing `f(g())` will
+>   always mean 'call `g()`, then pass the result to `f()`', but `h!(g())` with an `!` means 'call `h!()`
+>   with the AST (whatever) of its arguments and let it decide what to do with them. (You can't call `f!()`
+>   and you can't call `h()` unless these are defined; `f()` and `f!()` are two independent things.)
+>
+> * **user-defined operators**, or rather **pre-, in- and postfix function calls**. Prefix means that
+>   instead of `f(g())`, one can write `f g()`. This is a simple yet effective way to eliminate many, many
+>   gratuitous parentheses. Infix means one can write (say) `a ~equals~ b` as an equivalent to `equals a, b`
+>   and, hence, `equals(a,b)`. Postfix means one can write `g() ~f` for `f(g)`. This is arguably the same as
+>   piping so maybe should be written `g() | f`.
+>
+> * **Tagged literal calls** similar to JavaScripts [Tagged
+>   Templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates)
+>   but generalized to tacked-on prefixes like `f"bar"`, `s[1,2,3,]`, `t{a:1,}` which are just sugared
+>   function calls with arbitrary user-defined return values. Especially using tagged string literals is a
+>   powerful thing; personally I use it for example in CoffeeScript/JavaScript to just mark my SQL
+>   statements (as in `for row from db.query SQL"select * from t;"`) which is picked up by my customized
+>   syntax definition for Sublime Text; I find this gives me like 90% of the benefits of embedding SQL in my
+>   programming language but without the complexities. Another use case is Pythonesque f-strings, ex. `f"
+>   #{sku}:<9c; #{price}:>10.2f; "`; yet another is using custom optimized syntax for initializing
+>   ('serializing') arbitrary objects.
+>
+> I believe these Three Simple Things are almost everything you'd want from a macro facility, but, to make a
+> bold claim, without *any* of the downsides.
+
+* **Deferred Evaluation** (DEFEV)
+* **User-Defined Operators** (UDOPs), (**Pre-, In- and Postfix Function Calls**)
+* **Tagged Literals** (tLits) [tillits]
+
+
+### Better Un-Implicit Returns
+
+CoffeeScript's implicit returns mean
+
+
+* introduce a **(Return) Guard**, maybe as `./.`, to replace `return null` (and indicate 'this function does
+  not return a useful value', as opposed to 'intentionally returning `null`'):
+
+  ```coffee
+  f = ( a ) -> ./.
+  ```
+
+* introduce **Explicit Opt-In Forms** `f = ( a, b ) <-> ...`, `f = ( a, b ) <=> ...` for
+  functions that *should* use implicit return exactly as all functions do now
+
+* introduce **Explicit Opt-Out Forms** `f = ( a, b ) /-> ...`, `f = ( a, b ) /=> ...` that implicitly add a
+  terminating `null` expression (or a `return null` statement) to their source before compiling to JS.
+  Compare how at present, `-> yield d for d from e` compiles to
+
+  ```js
+  (function*() {
+    var d, results;
+    results = [];
+    for (d of e) {
+      results.push((yield d));
+    }
+    return results;
+  });
+  ```
+
+  while `-> yield d for d from e; null` and `-> yield d for d from e; return null` compile to
+
+  ```js
+  (function*() {
+    var d;
+    for (d of e) {
+      yield d;
+    }
+    return null;
+  });
+  ```
+
+  which is most often what one wants. With Explicit Opt-Out, the latter could be written as `/-> yield d for
+  d from e`. Syntactic variants like
+
+  * `f = ( a, b ) -/->`, `f = ( a, b ) =/=>`
+  * `f = ( a, b ) ->>`, `f = ( a, b ) =>>` (this one is *much* easier to type than `-/->`)
+
+  should be considered.
+
+
 
 ### Macchiato: Coffe Plus Macros
 
