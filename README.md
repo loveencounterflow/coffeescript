@@ -6,6 +6,7 @@
 - [RFCs](#rfcs)
   - [Three Simple Things](#three-simple-things)
   - [Better Un-Implicit Returns](#better-un-implicit-returns)
+    - [Solutions that Already Work](#solutions-that-already-work)
   - [Macchiato: Coffe Plus Macros](#macchiato-coffe-plus-macros)
   - [(Extended?) LightScript Tilde Calls](#extended-lightscript-tilde-calls)
   - [Tagged Comments for Conditional Execution](#tagged-comments-for-conditional-execution)
@@ -110,9 +111,45 @@ CoffeeScript's implicit returns mean
   d from e`. Syntactic variants like
 
   * `f = ( a, b ) -/->`, `f = ( a, b ) =/=>`
-  * `f = ( a, b ) ->>`, `f = ( a, b ) =>>` (this one is *much* easier to type than `-/->`)
+  * `f = ( a, b ) ->>`, `f = ( a, b ) =>>` (`->>` is *much* easier to type than `-/->`)
 
   should be considered.
+
+#### Solutions that Already Work
+
+The below solutions (1) thru (3) behave identically, demonstrating that just adding semicolons doesn't
+suffice to trick the CS compiler to drp an implicit return. Because there's a loop, an `Array` is
+constructed, populated and returned, only to be garbage-collected or leaking implementation details—that's
+five bad things for the price of one:
+
+```coffee
+# these return an array with the iteration results:
+
+f = -> d[ i ] = x for x, i in mylist          # (1)
+f = -> d[ i ] = x for x, i in mylist ;        # (2)
+f = -> d[ i ] = x for x, i in mylist ;;;;     # (3)
+```
+
+Solutions (4) thru (7) demonstrate a simple cop-out that's also 'graphically' appealing, so to speak. I
+especially like number (5) `-> whatever 'dontcare' ;___` and suspect that this idiom might be good enough to
+make fumbling with the CS tokenizer look like hardly worth the while:
+
+```coffee
+# these return `null`:
+
+_   = null
+___ = null
+N   = null
+
+f = -> d[ i ] = x for x, i in mylist ;_       # (4)
+
+f = -> d[ i ] = x for x, i in mylist ;___     # (5)
+
+f = -> d[ i ] = x for x, i in mylist ;N       # (6)
+
+f = -> d[ i ] = x for x, i in mylist ;null    # (7)
+```
+
 
 
 
