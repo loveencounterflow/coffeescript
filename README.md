@@ -151,6 +151,7 @@ f = -> d[ i ] = x for x, i in mylist ;null    # (7)
 ```
 
 **Update**—turns out implicit returns have caused a susbtantial amount of discussion back in the day (see for example
+[CoffeeScript#4210](https://github.com/jashkenas/coffeescript/issues/4210),
 [CoffeeScript#2477](https://github.com/jashkenas/coffeescript/issues/2477),
 [StackOverflow #7391493](http://stackoverflow.com/questions/7391493/is-there-any-way-to-not-return-something-using-coffeescript),
 [StackOverflow #15469580](http://stackoverflow.com/questions/15469580/how-to-avoid-an-implicit-return-in-coffeescript-in-conditional-expressions),
@@ -158,8 +159,15 @@ f = -> d[ i ] = x for x, i in mylist ;null    # (7)
 [StackOverflow #14177751](http://stackoverflow.com/questions/14177751/how-to-avoid-this-return-in-nested-coffeescript),
 [*Why I hate implicit return in CoffeeScript*](http://programmaticallyspeaking.com/why-i-hate-implicit-return-in-coffeescript.html),
 [*jQuery and CoffeeScript: trouble with automatic return*](https://coderwall.com/p/-vdm8q),
-[*While I love CoffeeScript, the always-implicit-return thing is my biggest pet peeve*](https://news.ycombinator.com/item?id=5389245))
+[*While I love CoffeeScript, the always-implicit-return thing is my biggest pet peeve*](https://news.ycombinator.com/item?id=5389245));
+in that light, were it not for backward compatibility, an opt-in for implicit return seems indeed advisable,
+with a lightweight syntax for opt-out appearing as the next best solution.
 
+* `-/>` has been [proposed as opt-out syntax](https://news.ycombinator.com/item?id=5389245)
+* `^value` has been [proposed as a shorter form of `return value`](https://news.ycombinator.com/item?id=5393220)
+* a new keyword like `stop` or `finish` [has been proposed](https://stackoverflow.com/a/24862881/7568091) to
+  block implicit return. (Turns out that a keyword is not strictly needed; just setting `finish = undefined`
+  or `over = null` or something like that would be enough to get the desired effect.)
 
 ### Macchiato: Coffe Plus Macros
 
