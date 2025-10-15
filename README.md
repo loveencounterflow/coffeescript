@@ -150,7 +150,15 @@ f = -> d[ i ] = x for x, i in mylist ;N       # (6)
 f = -> d[ i ] = x for x, i in mylist ;null    # (7)
 ```
 
-
+**Update**—turns out implicit returns have caused a susbtantial amount of discussion back in the day (see for example
+[CoffeeScript#2477](https://github.com/jashkenas/coffeescript/issues/2477),
+[StackOverflow #7391493](http://stackoverflow.com/questions/7391493/is-there-any-way-to-not-return-something-using-coffeescript),
+[StackOverflow #15469580](http://stackoverflow.com/questions/15469580/how-to-avoid-an-implicit-return-in-coffeescript-in-conditional-expressions),
+[StackOverflow #16882116](http://stackoverflow.com/questions/16882116/coffeescript-how-to-avoid-unnecessary-returns),
+[StackOverflow #14177751](http://stackoverflow.com/questions/14177751/how-to-avoid-this-return-in-nested-coffeescript),
+[*Why I hate implicit return in CoffeeScript*](http://programmaticallyspeaking.com/why-i-hate-implicit-return-in-coffeescript.html),
+[*jQuery and CoffeeScript: trouble with automatic return*](https://coderwall.com/p/-vdm8q),
+[*While I love CoffeeScript, the always-implicit-return thing is my biggest pet peeve*](https://news.ycombinator.com/item?id=5389245))
 
 
 ### Macchiato: Coffe Plus Macros
