@@ -10,6 +10,7 @@
   - [Macchiato: Coffe Plus Macros](#macchiato-coffe-plus-macros)
   - [(Extended?) LightScript Tilde Calls](#extended-lightscript-tilde-calls)
   - [Tagged Comments for Conditional Execution](#tagged-comments-for-conditional-execution)
+  - [Annotations to Obtain Sync and Async Methods from One Source](#annotations-to-obtain-sync-and-async-methods-from-one-source)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 
@@ -257,6 +258,75 @@ construct?
 * line comments of the form `/#:tag\s+(?<tagged_code>.*)$/`
 * block comments of the form `/###:tag\s+(?<tagged_code>.*)###$/s`
 * will be included in the code when a command-line flag or an in-file setting marks the tag for execution
+
+### Annotations to Obtain Sync and Async Methods from One Source
+
+In
+[JetStreams](https://github.com/loveencounterflow/bricabrac-sfmodules/blob/4a199b34744c0f19a1e349c35c07400ecb316f60/src/jetstream.brics.coffee#L193-L218),
+there is a need to have both synchronous and asynchronous versions of a number of methods to implement both
+a synchronous `Jetstream` and an asynchronous `Async_jetstream` class. This is somewhat obnoxious and there
+seemingly exists no very good way to do this than to write fully separate sync and async code for all
+methods that have to deal with async calls. Of course that leads to a lot of code duplication like this:
+
+```coffee
+#=========================================================================================================
+Jetstream::_pick = ( picker, P... ) ->
+  ### NOTE this used to be the idiomatic formulation `R = [ ( @walk P... )..., ]`; for the sake of making
+  sync and async versions maximally similar, rewritten as the sync version of `await Array.fromAsync @walk P...` ###
+  R = Array.from @walk P...
+  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CODE DUPLICATION BELOW >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  return R if picker is 'all'
+  if R.length is 0
+    throw new Error "no results" if @cfg.fallback is misfit
+    return @cfg.fallback
+  return R.at  0 if picker is 'first'
+  return R.at -1 if picker is 'last'
+  throw new Error "unknown picker #{picker}"
+
+#---------------------------------------------------------------------------------------------------------
+Async_jetstream::_pick = ( picker, P... ) ->
+  ### NOTE best async equivalent to `[ ( @walk P... )..., ]` I could find ###
+  ### NOTE my first solution was `R = ( d for await d from @walk P... )`, but that transpiles into quite a few lines of JS ###
+  ### thx to https://allthingssmitty.com/2025/07/14/modern-async-iteration-in-javascript-with-array-fromasync/ ###
+  R = await Array.fromAsync @walk P...
+  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CODE DUPLICATION BELOW >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  return R if picker is 'all'
+  if R.length is 0
+    throw new Error "no results" if @cfg.fallback is misfit
+    return @cfg.fallback
+  return R.at  0 if picker is 'first'
+  return R.at -1 if picker is 'last'
+  throw new Error "unknown picker #{picker}"
+```
+
+To mitigate the effects, one could of course do some refactoring of the above code and put the duplicated
+parts into a method that is shared by both versions of `pick()`, which is what I'm going to do next:
+
+```coffee
+Jetstream::_pick       = ( picker, P... ) -> R = @_pick_from_list picker,       Array.from      @walk P...
+Async_jetstream::_pick = ( picker, P... ) -> R = @_pick_from_list picker, await Array.fromAsync @walk P...
+```
+
+In principle the question remains whether it's feasible and worthwhile to write such code once instead of
+twice, especially if the only delta between the two versions is the presence vs the absence of `await` in
+the right spots; in this example, it's hard to see how the code could benefit from refactoring in the way
+the code sample from above did:
+
+```coffee
+  #=========================================================================================================
+  Jetstream::_walk_all_to_exhaustion = ->
+    if @is_empty  then  yield                             @shelf.shift() while @shelf.length > 0
+    else                yield from       @transforms[ 0 ] @shelf.shift() while @shelf.length > 0
+    #                              ▲▲▲▲▲
+    ;null
+
+  #---------------------------------------------------------------------------------------------------------
+  Async_jetstream::_walk_all_to_exhaustion = ->
+    if @is_empty  then  yield                             @shelf.shift() while @shelf.length > 0
+    else                yield from await @transforms[ 0 ] @shelf.shift() while @shelf.length > 0
+    #                              ▲▲▲▲▲
+    ;null
+```
 
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
