@@ -1,3 +1,11 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [How to contribute to CoffeeScript](#how-to-contribute-to-coffeescript)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## How to contribute to CoffeeScript
 
 * Before you open a ticket or send a pull request, [search](https://github.com/jashkenas/coffeescript/issues) for previous discussions about the same feature or issue. Add to the earlier ticket if you find one.

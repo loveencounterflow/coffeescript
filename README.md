@@ -9,6 +9,7 @@
     - [Solutions that Already Work](#solutions-that-already-work)
   - [Macchiato: Coffe Plus Macros](#macchiato-coffe-plus-macros)
   - [(Extended?) LightScript Tilde Calls](#extended-lightscript-tilde-calls)
+  - [Abusing the `|` Pipe Character for Syntactic Betterment (UDOPs)](#abusing-the--pipe-character-for-syntactic-betterment-udops)
   - [Tagged Comments for Conditional Execution](#tagged-comments-for-conditional-execution)
   - [Annotations to Obtain Sync and Async Methods from One Source](#annotations-to-obtain-sync-and-async-methods-from-one-source)
 - [Installation](#installation)
@@ -80,6 +81,10 @@ CoffeeScript's implicit returns mean
 
 * introduce **Explicit Opt-In Forms** `f = ( a, b ) <-> ...`, `f = ( a, b ) <=> ...` for
   functions that *should* use implicit return exactly as all functions do now
+
+* introduce **Implicitly Explicit Opt-Out Forms** `f = ( a, b ) -> ...; < ...` where the initial `<`
+  less-than operator of an expression expands to `return ...`. Single-expression lambdas could be written
+  as `f = ( a, b ) ->>< a * b` (using `->>` to block implicit `return`).
 
 * introduce **Explicit Opt-Out Forms** `f = ( a, b ) /-> ...`, `f = ( a, b ) /=> ...` that implicitly add a
   terminating `null` expression (or a `return null` statement) to their source before compiling to JS.
@@ -252,6 +257,75 @@ construct?
   expressions more like operators
   * in fact maybe call them 'tilde *operators*'
 * despense with parens as in `a ~neg` -> CS `neg a` -> JS `neg( a )`?
+
+### Abusing the `|` Pipe Character for Syntactic Betterment (UDOPs)
+
+A quick test convinced me that the pipe operator is sort-of up to the task to take up a new syntactic role
+in life:
+
+```
+$$$ coffee -epb 'f 1, | a equals 87 |, 9'                                                                                           1 х  bvfs @ 1.0.0 pkg  at 11:24:37
+[stdin]:1:6: error: unexpected |
+f 1, | a equals 87 |, 9
+     ^
+$$$ coffee -epb 'f 1, is_even 87 |, 9'                                                                                              1 х  bvfs @ 1.0.0 pkg  at 11:27:33
+[stdin]:1:18: error: unexpected ,
+f 1, is_even 87 |, 9
+                 ^
+$$$ coffee -epb 'f 1, | 87 is_even, 9'                                                                                              1 х  bvfs @ 1.0.0 pkg  at 11:28:30
+[stdin]:1:6: error: unexpected |
+f 1, | 87 is_even, 9
+     ^
+```
+
+The rules for this variant of User-Defined Operators (UDOPs) would be roughly as follows:
+
+* The 'regular' arguments for a function call (those on the right that follow the function name) may be
+  delineated by placing a `|` (pipe) after the last argument, so the following equivalences hold:+
+
+  * `f|` is equivalent to `f()`
+  * `( expression )|` is equivalent to `( expression )()`
+  * `f 8|` is equivalent to `f 8` (hence, `f( 8 )`)
+  * `g f 8|, 11` is equivalent to `g ( f 8 ), 11` (hence, `g( f( 8 ), 11 )`)
+  * `g f 8, 9|, 11` is equivalent to `g ( f 8, 9 ), 11` (hence, `g( f( 8, 9 ), 11 )`)
+
+* For the time being, let's relegate ourselves to allowing a *single* argument to be delineated by a pipe,
+  so we allow `g f 5|, 11` but not `g f 5, 6|, 11`
+
+* The 'preposed' arguments for a function call have to be preceded by a `|` (pipe) symbol, so the following
+  equivalences hold:
+
+  * `|f` (or `| f`) is equivalent to `f()`
+  * `|( expression )` is equivalent to `( expression )()`
+  * `| 8 f` is equivalent to `f 8` (hence, `f( 8 )`)
+  * `g | 8 f, 11` is equivalent to `g ( f 8 ), 11` (hence, `g( f( 8 ), 11 )`)
+  * `g | 8, 9 f, 11` is equivalent to `g ( f 8, 9 ), 11` (hence, `g( f( 8, 9 ), 11 )`)
+
+* The 'circumposed' arguments for a function call have to be preceded by a `|` (pipe) symbol, so the
+  following equivalences hold:
+
+  * `|f|` (or `| f |`) is equivalent to `f()`
+  * `|( expression )|` is equivalent to `( expression )()`
+  * `| 8 f |` is equivalent to `f 8` (hence, `f( 8 )`)
+  * `g | 8 f |, 11` is equivalent to `g ( f 8 ), 11` (hence, `g( f( 8 ), 11 )`)
+  * `g | 8, 9 f |, 11` is equivalent to `g ( f 8, 9 ), 11` (hence, `g( f( 8, 9 ), 11 )`)
+  * `g | 8 f 9 |, 11` is *also* equivalent to `g ( f 8, 9 ), 11` (hence, `g( f( 8, 9 ), 11 )`)
+
+This last-mentioned form, `g | 8 f 9 |, 11`, is really the main target here; it is what enables us to
+reformulate function call syntax to operator syntax, not unlike JS treats `y instanceof C`.
+
+Open questions:
+
+  * What level of code analysis is needed to capture instances of `| e1 e2 e3 |` and rewrite them as `e2(
+    e1, e3 )`?
+  * should we require function names to be used as operators to be declared to the preprocessor?
+  * if mandatory operator declaration is deemed necessary or even advantageous, can symbolic operators be
+    allowed? For example, `| %a != %b |`, `| %a not equal to %b |`, `| %a isnt equal to %b |`, `| %a doesnt
+    equal %b |` could be declared to be equivalents of `( not equals( %a, %b ) )` (using `%` (percent)
+    sigils as syntax for macro parameters)
+  * if we declare operators anyway, do we still need the `|` fences?
+  * there should be a away to 'import syntax', whereas CJS `require()` and ESM `import` should of course not
+    leak their syntax into the host module.
 
 ### Tagged Comments for Conditional Execution
 
